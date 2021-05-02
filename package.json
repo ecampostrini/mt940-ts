@@ -1,0 +1,26 @@
+{
+  "name": "mt940-ts",
+  "version": "1.0.0",
+  "description": "Parser for MTXXX financial messages defined by the SWIFT standard",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^14.14.10",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "prettier": "^2.2.1"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mt940",
+    "mt942",
+    "mt94x",
+    "swfit",
+    "swift-parser",
+    "swift-messages"
+  ],
+  "author": "Esteban Campostrini",
+  "license": "Apache 2.0"
+}
