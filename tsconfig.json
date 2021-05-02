@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "outDir": "build",
+        "esModuleInterop": true,
+        "experimentalDecorators": true,
+        "lib": ["ES6"],
+        "target": "ES2017",
+        "baseUrl": "."
+    },
+    "include": ["**/*"],
+    "exclude": ["node_modules", "**/*.spec.ts"]
+}
