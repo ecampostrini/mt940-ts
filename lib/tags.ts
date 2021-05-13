@@ -205,7 +205,7 @@ const balanceRegex = RegExp(
     `(D|C)`, // D/C Mark
     `(${SwiftCharacters.Numeric}{6})`, // Date
     `(${SwiftCharacters.Alpha}{3})`, // Currency
-    `(${SwiftCharacters.Numeric}{1,15}),(${SwiftCharacters.Numeric}{1,2})`, // Amount
+    `(${SwiftCharacters.Numeric}{1,15}),(${SwiftCharacters.Numeric}{0,2})`, // Amount
     `$`,
   ].join(''),
 );
