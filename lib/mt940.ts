@@ -19,6 +19,7 @@ const mt940 = {
   openingBalance: tag60F('mandatory'),
   records: REPEAT(tag61('mandatory'), tag86('mandatory')),
   closingBalance: tag62F('mandatory'),
+  informationToAccountOwner: tag86('optional'),
 };
 
 export const parser = parserFactory(mt940);
