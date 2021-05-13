@@ -131,7 +131,7 @@ export const tag61 = configTag(
       `(${SwiftCharacters.Numeric}{4})?`, // entry date
       `(C|D|RD|RC)`, // debit/credit mark
       `(${SwiftCharacters.Alpha})?`, // funds code
-      `(${SwiftCharacters.Numeric}{1,15}),(${SwiftCharacters.Numeric}{0,2})`, // Amount
+      `(${SwiftCharacters.Numeric}{1,15})(?:,(${SwiftCharacters.Numeric}{0,2}))?`, // Amount
       `(S|N|F)?`, // transaction type
       `(${SwiftCharacters.AlphaNumeric}{3})`, // identification code
       `(${SwiftCharacters.X}{1,34})`, // reference for the account owner and account servicing institution
@@ -205,7 +205,7 @@ const balanceRegex = RegExp(
     `(D|C)`, // D/C Mark
     `(${SwiftCharacters.Numeric}{6})`, // Date
     `(${SwiftCharacters.Alpha}{3})`, // Currency
-    `(${SwiftCharacters.Numeric}{1,15}),(${SwiftCharacters.Numeric}{0,2})`, // Amount
+    `(${SwiftCharacters.Numeric}{1,15})(?:,(${SwiftCharacters.Numeric}{0,2}))?`, // Amount
     `$`,
   ].join(''),
 );
