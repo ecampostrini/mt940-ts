@@ -2,15 +2,18 @@
   "name": "mt940-ts",
   "version": "1.0.0",
   "description": "Parser for MTXXX financial messages defined by the SWIFT standard",
-  "main": "index.js",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "files": ["/lib"],
   "dependencies": {},
   "devDependencies": {
-    "@types/node": "^14.14.10",
+    "@types/node": "^15.14.10",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-prettier": "^3.1.4",
     "prettier": "^2.2.1"
   },
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
