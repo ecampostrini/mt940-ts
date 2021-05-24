@@ -18,3 +18,6 @@ lib
 
 # Files used during development
 local
+
+# Files generated during tests
+coverage
