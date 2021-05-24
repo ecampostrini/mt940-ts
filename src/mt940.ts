@@ -12,9 +12,9 @@ import { REPEAT } from './combinators';
 import { parserFactory } from './parser';
 
 const mt940 = {
-  targetAccount: tag20('mandatory'),
-  referenciaDeMensaje: tag21('optional'),
-  identificacionDeCuenta: tag25('mandatory'),
+  transactionReferenceNumber: tag20('mandatory'),
+  relatedReference: tag21('optional'),
+  accountIdentification: tag25('mandatory'),
   statementNumber: tag28('mandatory'),
   openingBalance: tag60F('mandatory'),
   records: REPEAT(tag61('mandatory'), tag86('mandatory')),
