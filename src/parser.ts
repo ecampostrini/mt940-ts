@@ -19,7 +19,7 @@ export const parse = <T extends Record<string, Tag<any>>>(
     if (tokenizer.peek().type === "EOF") break;
 
     const message = {} as M<T>;
-    for (let key in spec) {
+    for (const key in spec) {
       if (spec.hasOwnProperty(key)) {
         message[key] = spec[key](tokenizer);
       }
@@ -28,7 +28,7 @@ export const parse = <T extends Record<string, Tag<any>>>(
     ret.push(message);
   }
 
-  return ret as any;
+  return ret;
 };
 
 export const parserFactory = <T extends Record<string, Tag<any>>>(specs: T) => (

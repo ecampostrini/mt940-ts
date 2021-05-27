@@ -7,7 +7,7 @@ describe("MT940 parser", () => {
     expect(mt940Parser(input)).toEqual([expectedOutput]);
   });
 
-  test.skip("Parse simple statement with message blocks", () => {
+  test("Parse simple statement with message blocks", () => {
     const { input, expectedOutput } = simpleStatementWithMessageBlocks;
     expect(mt940Parser(input)).toEqual([expectedOutput]);
   });

@@ -10,7 +10,7 @@ const TAG = RegExp(`^:(${TOKEN.TAG}):`);
 
 //const RIGHT_CURLY_BRACE = /^(})/;
 
-const BLOCK_START = /^{([1-5]):/;
+const BLOCK_START = /^{([1-9][0-9]{0,2}|[A-Z]{1,3}):/;
 
 const BLOCK_END = /^(})/;
 

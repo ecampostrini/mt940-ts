@@ -62,7 +62,7 @@ export const simpleStatementWithMessageBlocks: MtFixture = {
     "{1:F02OELBATWWAXXX0975000073}",
     "{2:I103ABNANL2AXXXXU3003}",
     "{3:{113:URGT} {108:INTLPMTS} {121:79df44f1-73b2-4622-b4a0-32c4c295a2be}}{4:",
-    ...simpleStatement.input,
+    simpleStatement.input,
     "-}",
     "{5:{CHK:123456789ABC}}",
   ].join("\r\n"),
