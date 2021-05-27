@@ -4,12 +4,6 @@ enum TOKEN {
 
 const TAG = RegExp(`^:(${TOKEN.TAG}):`);
 
-//const BLOCK_ID = /^([1-5]):/;
-
-//const LEFT_CURLY_BRACE = /^({)/;
-
-//const RIGHT_CURLY_BRACE = /^(})/;
-
 const BLOCK_START = /^{([1-9][0-9]{0,2}|[A-Z]{1,3}):/;
 
 const BLOCK_END = /^(})/;
