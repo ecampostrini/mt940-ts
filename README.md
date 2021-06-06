@@ -1,6 +1,9 @@
-# mt940-ts
+# mt940-ts 
 
-A Typescript library for parsing [MT940](https://www2.swift.com/knowledgecentre/publications/us9m_20200724/2.0?topic=mt940.htm) messages. It takes as an input text representing a set of MT940 statements and produces an array of statements as output. 
+[![Build Status](https://travis-ci.com/ecampostrini/mt940-ts.svg?branch=main)](https://travis-ci.com/ecampostrini/mt940-ts)
+
+
+A Typescript library for parsing [MT940](https://www2.swift.com/knowledgecentre/publications/us9m_20200724/2.0?topic=mt940.htm) messages. It takes as an input text representing a set of MT940 statements and produces an array of statements as output.
 
 # Installation
 
