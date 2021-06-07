@@ -16,38 +16,58 @@ export type TagId =
   | '86';
 
 type Status = 'mandatory' | 'optional';
+type ParseLineResult = {
+  match?: RegExpExecArray,
+  nonMatchReason?: string,
+}
+
+export const getLine = (tokenizer: Tokenizer): string | undefined => {
+  let content = "";
+  let next = tokenizer.peek();
+  let line = next.line;
+
+  while ((next.type === 'TEXT' || next.type === 'MINUS') && line === next.line) {
+    content = content + next.content;
+    tokenizer.next();
+    next = tokenizer.peek();
+  }
+  return content ? content : undefined;
+}
 
 export const configTag = <T>(
   tagId: TagId,
-  pattern: RegExp,
-  bodyParser: (execArray: RegExpExecArray) => T,
+  regexList: RegExp[],
+  bodyParser: (lines: ParseLineResult[]) => T,
 ): ((status: Status) => Tag<T>) => {
   return (status: Status) => (tokenizer: Tokenizer): T => {
-    const { type, content, line } = tokenizer.peek();
+    const { type, content, line: lineNum } = tokenizer.peek();
     if (type !== 'TAG' || content !== tagId) {
       if (status === 'mandatory') {
-        throw new Error(`filname:${line}: Missing mandatory tag ${tagId}`);
+        throw new Error(`filename:${lineNum}: Missing mandatory tag ${tagId}`);
       }
       return;
     }
     // Consume the 'TAG' token
     tokenizer.next();
 
-    let tagBody: string = '';
-    while (tokenizer.peek()?.type === 'TEXT') {
-      if (tagBody) tagBody += '\n';
-      tagBody += tokenizer.next().content;
+
+    let matches: ParseLineResult[] = [];
+    let match: RegExpExecArray | null = null;
+    let count = 0;
+    let line: string | undefined;
+    while ((line = getLine(tokenizer))) {
+      const regex = regexList[count];
+      if (!(match = regex.exec(line))) {
+        matches.push({
+          nonMatchReason: `filename:${lineNum + count}: '${line}' doesn't match the regex '${regex}'`
+        });
+        break;
+      }
+      matches.push({match});
+      count += 1;
     }
 
-    const match = pattern.exec(tagBody);
-    if (!match) {
-      throw new Error(
-        `filename:${line}: line '${tagBody}' doesn't match regex '${pattern}' while parsing ` +
-          `tag ${tagId}`,
-      );
-    }
-
-    return bodyParser(match);
+    return bodyParser(matches);
   };
 };
 
@@ -56,10 +76,17 @@ export const configTag = <T>(
  *
  * This field specifies the reference assigned by the Sender to unambiguously identify the message.
  */
+const tag20Regex = [
+  RegExp(`^(${SwiftCharacters.X}{0,16})$`)
+];
+
 export const tag20 = configTag<string>(
   '20',
-  RegExp(`^(${SwiftCharacters.X}{0,16})$`),
-  (match) => {
+  tag20Regex,
+  (resultList) => {
+    const [{match, nonMatchReason}] = resultList;
+    if (nonMatchReason)
+      throw new Error(nonMatchReason);
     return match[1];
   },
 );
@@ -70,11 +97,18 @@ export const tag20 = configTag<string>(
  * If the MT 940 is sent in response to an MT 920 Request Message, this field must contain
  * the field 20 Transaction Reference Number of the request message.
  */
+const tag21Regex = [
+  RegExp(`^(${SwiftCharacters.X}{0,16})$`),
+];
+
 export const tag21 = configTag(
   '21',
-  RegExp(`^(${SwiftCharacters.X}{0,16})$`),
-  (match) => {
-    return match[1] ? match[1] : undefined;
+  tag21Regex,
+  (resultList) => {
+    const [{match ,nonMatchReason}] = resultList;
+    if (nonMatchReason)
+      throw new Error(nonMatchReason);
+    return match[1];
   },
 );
 
@@ -84,10 +118,17 @@ export const tag21 = configTag(
  * This field identifies the account and optionally the identifier code of the account
  * owner for which the statement is sent.
  */
+const tag25Regex = [
+  RegExp(`^(${SwiftCharacters.X}{1,35})$`),
+]
+
 export const tag25 = configTag(
   '25',
-  RegExp(`^(${SwiftCharacters.X}{1,35})$`),
-  (match) => {
+  tag25Regex,
+  (resultList) => {
+    const [{match ,nonMatchReason}] = resultList;
+    if (nonMatchReason)
+      throw new Error(nonMatchReason);
     return match[1];
   },
 );
@@ -99,19 +140,30 @@ export const tag25 = configTag(
  * the sequence number of the message within that statement when more than one message
  * is sent for one statement.
  */
-export const tag28 = configTag(
-  '28C',
+const tag28CRegex = [
   RegExp(
     `^(${SwiftCharacters.Numeric}{1,5})(?:/(${SwiftCharacters.Numeric}{1,5}))?$`,
   ),
-  (match) => {
+];
+
+export const tag28 = configTag(
+  '28C',
+  tag28CRegex,
+  (resultList) => {
     const ret = {} as {
       statementNumber: string;
       sequenceNumber?: string;
     };
+    const [
+      {match, nonMatchReason},
+    ] = resultList;
 
+    if (nonMatchReason)
+      throw new Error(nonMatchReason);
     ret.statementNumber = match[1];
-    if (match[2]) ret.sequenceNumber = match[2];
+
+    if (match[2])
+      ret.sequenceNumber = match[2];
 
     return ret;
   },
@@ -122,8 +174,7 @@ export const tag28 = configTag(
  *
  * This field contains the details of each transaction.
  */
-export const tag61 = configTag(
-  '61',
+const tag61Regex = [
   RegExp(
     [
       `^`,
@@ -135,11 +186,18 @@ export const tag61 = configTag(
       `(S|N|F)?`, // transaction type
       `(${SwiftCharacters.AlphaNumeric}{3})`, // identification code
       `(${SwiftCharacters.X}{1,34})`, // reference for the account owner and account servicing institution
-      `(?:\n(${SwiftCharacters.X}{1,34}))?`, // Supplementary details
       `$`,
     ].join(''),
   ),
-  (match) => {
+  RegExp(
+      `^(?:(${SwiftCharacters.X}{1,34}))?$`, // Supplementary details
+  ),
+]
+
+export const tag61 = configTag(
+  '61',
+  tag61Regex,
+  (resultList) => {
     const ret = {} as {
       valueDate: string;
       entryDate?: string;
@@ -153,25 +211,33 @@ export const tag61 = configTag(
       supplementaryDetails?: string;
     };
 
-    ret.valueDate = match[1];
-    ret.entryDate = match[2];
-    ret.isCredit = match[3] === 'C' || match[3] === 'RD';
-    if (match[4]) ret.fundsCode = match[4];
-    ret.amount = match[5] + ',' + (match[6] ? match[6] : '00');
-    ret.transactionType = match[7];
-    ret.identificationCode = match[8];
+    const [
+      {match: firstLineMatch, nonMatchReason: firstLineNoMatchReason},
+      {match: secondLineMatch}
+    ] = resultList;
+
+    if (firstLineNoMatchReason)
+      throw new Error(firstLineNoMatchReason);
+
+    ret.valueDate = firstLineMatch[1];
+    ret.entryDate = firstLineMatch[2];
+    ret.isCredit = firstLineMatch[3] === 'C' || firstLineMatch[3] === 'RD';
+    if (firstLineMatch[4]) ret.fundsCode = firstLineMatch[4];
+    ret.amount = firstLineMatch[5] + ',' + (firstLineMatch[6] ? firstLineMatch[6] : '00');
+    ret.transactionType = firstLineMatch[7];
+    ret.identificationCode = firstLineMatch[8];
 
     // Find the `//` that is in between the reference for the account owner and the reference
     // for the account servicing institution
-    const separatorPos = match[9].search('//');
+    const separatorPos = firstLineMatch[9].search('//');
     if (separatorPos === -1) {
-      ret.referenceForAccountOwner = match[9];
+      ret.referenceForAccountOwner = firstLineMatch[9];
     } else {
-      ret.referenceForAccountOwner = match[9].slice(0, separatorPos);
-      ret.referenceForAccountInstitution = match[9].slice(separatorPos + 2);
+      ret.referenceForAccountOwner = firstLineMatch[9].slice(0, separatorPos);
+      ret.referenceForAccountInstitution = firstLineMatch[9].slice(separatorPos + 2);
     }
 
-    if (match[10]) ret.supplementaryDetails = match[10];
+    if (secondLineMatch) ret.supplementaryDetails = secondLineMatch[1];
 
     return ret;
   },
@@ -183,23 +249,44 @@ export const tag61 = configTag(
  * This field contains additional information about the transaction detailed in the preceding
  * statement line and which is to be passed on to the account owner.
  */
+const tag86Regex = [
+    RegExp([`^`, `(.{1,65})`, `$`].join('')),
+    RegExp([`^`, `(.{1,65})`, `$`].join('')),
+    RegExp([`^`, `(.{1,65})`, `$`].join('')),
+    RegExp([`^`, `(.{1,65})`, `$`].join('')),
+    RegExp([`^`, `(.{1,65})`, `$`].join('')),
+    RegExp([`^`, `(.{1,65})`, `$`].join('')),
+]
+
 export const tag86 = configTag(
   '86',
-  RegExp([`^`, `(.{1,65})`, `(?:\n(.{1,65}))?`.repeat(5), `$`].join('')),
-  (match) => {
+  tag86Regex,
+  (resultList) => {
+    const [
+      {match: line1Match, nonMatchReason: line1NoMatchReason},
+      {match: line2Match},
+      {match: line3Match},
+      {match: line4Match},
+      {match: line5Match},
+      {match: line6Match},
+    ] = resultList;
+
+    if (line1NoMatchReason)
+      throw new Error(line1NoMatchReason);
+
     return {
       accountOwnerInformation:
-        (match[1] || '') +
-        (match[2] || '') +
-        (match[3] || '') +
-        (match[4] || '') +
-        (match[5] || '') +
-        (match[6] || ''),
-    };
+        line1Match[1] +
+        (line2Match?.[1] ?? '') +
+        (line3Match?.[1] ?? '') +
+        (line4Match?.[1] ?? '') +
+        (line5Match?.[1] ?? '') +
+        (line6Match?.[1] ?? '')
+    }
   },
 );
 
-const balanceRegex = RegExp(
+const balanceRegex = [RegExp(
   [
     `^`,
     `(D|C)`, // D/C Mark
@@ -208,15 +295,20 @@ const balanceRegex = RegExp(
     `(${SwiftCharacters.Numeric}{1,15})(?:,(${SwiftCharacters.Numeric}{0,2}))?`, // Amount
     `$`,
   ].join(''),
-);
+)];
 
-const balanceParser = (match: RegExpExecArray) => {
+const balanceParser = (resultList: ParseLineResult[]) => {
   const ret = {} as {
     isCredit: boolean;
     date: string;
     currency: string;
     amount: string;
   };
+
+  const [{match, nonMatchReason}] = resultList;
+
+  if (nonMatchReason)
+    throw new Error(nonMatchReason);
 
   ret.isCredit = match[1] === 'C';
   ret.date = match[2];
