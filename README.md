@@ -7,7 +7,9 @@ A Typescript library for parsing [MT940](https://www2.swift.com/knowledgecentre/
 
 # Installation
 
-TDB
+```bash
+npm install mt940-ts
+```
 
 # Usage
 
