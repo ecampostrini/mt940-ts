@@ -12,7 +12,7 @@ npm install mt940-ts
 
 # Usage
 
-The module exports an `mt940Parser` method that takes a string as an agurment and returns an array of statements representing each of the MT940 messages present in the input.
+The module exports an `mt940Parser` method that takes a string as an argument and returns an array of statements representing each of the MT940 messages present in the input.
 
 ## Example
 
@@ -36,14 +36,14 @@ for (const statement of parsed) {
 
 # Creating a custom parser
 
-`mt940-ts` aims to be provide a simple framework that facilitates the creation of parsers for any MTXXX Swift message.
+`mt940-ts` aims to be a simple framework that facilitates the creation of parsers for any MTXXX Swift message.
 In order to write a custom parser for a given MTXXX message, the following steps must be followed:
 
 - define the tags that compose the MTXXX message
 - create an object that represents the structure of the MTXXX message, where each property belongs to a field in the MTXXX message and each value is the tag that corresponds to such property
 - create the parser by calling the `parserFactory` function from `src/parser.ts` passing the object created on the previous step as the parameter
 
-As an example, les create a parser for the [MT973](https://www2.swift.com/knowledgecentre/publications/usgf_20210723/2.0?topic=rsc_olh_mt973.htm) message. I chose this one because it's rather small, having only 3 fields. Let's start by extending the `src/tags.ts` file with the definition of the tag `12` (tags `20` and `25` are already defined since they are used by the MT940 parser):
+As an example, lets create a parser for the [MT973](https://www2.swift.com/knowledgecentre/publications/usgf_20210723/2.0?topic=rsc_olh_mt973.htm) message. I chose this one because it's rather small, having only 3 fields. Let's start by extending the `src/tags.ts` file with the definition of the tag `12` (tags `20` and `25` are already defined since they are used by the MT940 parser):
 
 ```typescript
 /*
@@ -85,7 +85,7 @@ export const parser = parserFactory(mt973);
 
 Note that the `requestedMessages` field uses the `REPEAT` parser combinator _combines_ the given tags into a single tag and expects one or more occurrences of such combined tag in the input.
 
-Now we can import our paser in our project and use it like so:
+Now we can import our parser in our project and use it like so:
 
 ```typescript
 import { parser as mt973Parser } from "./mt973";
