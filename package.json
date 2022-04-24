@@ -1,6 +1,6 @@
 {
   "name": "mt940-ts",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Parser for MTXXX financial messages defined by the SWIFT standard",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
